@@ -1,0 +1,13 @@
+{
+  "name": "world-cup-2026-hub",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive FIFA World Cup 2026 global match, watch, and news hub.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

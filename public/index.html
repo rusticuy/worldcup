@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="FIFA World Cup 2026 global match times, watch guide, host clocks, and Firecrawl-powered news."
+    />
+    <title>World Cup 2026 Hub</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="topbar">
+        <a class="brand" href="#home" aria-label="World Cup 2026 home">
+          <span class="brand-mark">26</span>
+          <span>
+            <strong>WORLD CUP</strong>
+            <small>2026 GLOBAL HUB</small>
+          </span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#planner">Planner</a>
+          <a href="#matches">Matches</a>
+          <a href="#watch">Watch</a>
+          <a href="#cities">Cities</a>
+          <a href="#news">News</a>
+        </nav>
+        <div class="top-actions">
+          <button class="icon-button" id="searchToggle" aria-label="Search">
+            <span aria-hidden="true">&#8981;</span>
+          </button>
+          <a class="ghost-button" href="https://www.fifa.com/en/tickets" target="_blank" rel="noreferrer">
+            Tickets
+          </a>
+        </div>
+      </header>
+
+      <main id="home">
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="hero-copy">
+            <p class="eyebrow">Canada - Mexico - United States</p>
+            <h1 id="hero-title">The world's game, tuned for every clock.</h1>
+            <p class="hero-text">
+              Follow all 104 FIFA World Cup 2026 matches with kickoff times converted for your location,
+              official watch options by country, live host-city clocks, and Firecrawl news.
+            </p>
+            <div class="hero-actions">
+              <a class="primary-button" href="#planner">Set my timezone</a>
+              <a class="secondary-button" href="#matches">Explore matches</a>
+            </div>
+          </div>
+
+          <aside class="countdown-panel" aria-label="Countdown to kickoff">
+            <span class="panel-label">Countdown to opening match</span>
+            <div class="count-grid" id="countdown">
+              <span><strong>--</strong><small>Days</small></span>
+              <span><strong>--</strong><small>Hours</small></span>
+              <span><strong>--</strong><small>Mins</small></span>
+              <span><strong>--</strong><small>Secs</small></span>
+            </div>
+            <p>Mexico vs South Africa - June 11, 2026 - 13:00 Mexico City</p>
+          </aside>
+        </section>
+
+        <section class="ticker" aria-label="Tournament highlights">
+          <span class="live-dot"></span>
+          <strong>Full schedule</strong>
+          <div class="ticker-track" id="tickerTrack"></div>
+        </section>
+
+        <section class="planner-spotlight" id="planner" aria-labelledby="planner-title">
+          <article class="panel time-panel">
+            <div class="planner-copy">
+              <div>
+                <p class="eyebrow">All 104 matches</p>
+                <h2 id="planner-title">Your kickoff planner</h2>
+              </div>
+              <p class="planner-note">
+                Pick your location once. Every match instantly converts from host-city kickoff to your clock.
+              </p>
+            </div>
+            <div class="planner-control">
+              <label class="control-label" for="timezoneSelect">Show times for</label>
+              <select id="timezoneSelect"></select>
+            </div>
+            <div class="time-stack" id="timeStack"></div>
+          </article>
+        </section>
+
+        <section class="schedule-stage" id="matches">
+          <article class="panel schedule-board-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Match control room</p>
+                <h2>Schedule</h2>
+              </div>
+              <span class="match-count" id="matchCount">Loading matches</span>
+            </div>
+            <div class="schedule-command">
+              <div class="match-tools">
+                <label class="visually-hidden" for="matchSearch">Search matches</label>
+                <input id="matchSearch" type="search" placeholder="Search team, city, venue, group, or match #" />
+                <select id="matchFilter" aria-label="Filter matches">
+                  <option value="all">All 104</option>
+                  <option value="group">Group stage</option>
+                  <option value="knockout">Knockout stage</option>
+                  <option value="host">Host nations</option>
+                  <option value="prime">Marquee matches</option>
+                </select>
+              </div>
+              <div class="active-phase" id="activePhase" hidden></div>
+              <div class="matchday-rail" id="matchdayRail" aria-label="Matchday picker"></div>
+            </div>
+            <div class="schedule-spotlight" id="scheduleSpotlight"></div>
+            <div class="match-list" id="matchList"></div>
+          </article>
+
+          <article class="panel schedule-sidebar-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Road to glory</p>
+                <h2>Tournament route</h2>
+              </div>
+            </div>
+            <div class="phase-list" id="phaseList"></div>
+            <div class="format-grid">
+              <span><strong>48</strong><small>Teams</small></span>
+              <span><strong>104</strong><small>Matches</small></span>
+              <span><strong>16</strong><small>Host cities</small></span>
+              <span><strong>3</strong><small>Countries</small></span>
+            </div>
+            <div class="bracket-preview" id="bracketPreview"></div>
+          </article>
+        </section>
+
+        <section class="wide-grid">
+          <article class="panel host-clock-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Location time</p>
+                <h2>Host map</h2>
+              </div>
+            </div>
+            <div class="host-map-layout">
+              <div class="host-map" id="hostMap" aria-label="FIFA World Cup 2026 host city stadium map"></div>
+              <aside class="host-map-detail" id="hostMapDetail"></aside>
+            </div>
+          </article>
+
+          <article class="panel watch-panel" id="watch">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Watch finder</p>
+                <h2>Find legal coverage</h2>
+              </div>
+            </div>
+            <div class="watch-controls">
+              <input id="countrySearch" type="search" placeholder="Search country or broadcaster" />
+              <select id="countrySelect" aria-label="Country"></select>
+            </div>
+            <div class="watch-card" id="watchCard"></div>
+          </article>
+        </section>
+
+        <section class="panel cities-panel" id="cities">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Host cities</p>
+              <h2>Across North America</h2>
+            </div>
+            <span class="muted">Local names shown where available</span>
+          </div>
+          <div class="city-strip" id="cityStrip"></div>
+        </section>
+
+        <section class="bottom-grid">
+          <article class="panel news-panel" id="news">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Tournament news</p>
+                <h2>Firecrawl feed</h2>
+              </div>
+              <button class="small-button" id="refreshNews">Refresh</button>
+            </div>
+            <div class="news-status" id="newsStatus">Loading latest news...</div>
+            <div class="news-list" id="newsList"></div>
+          </article>
+
+          <article class="panel sources-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Verified basis</p>
+                <h2>Source links</h2>
+              </div>
+            </div>
+            <div class="source-status" id="scheduleStatus">Loading FIFA source status...</div>
+            <div class="source-list" id="scheduleSources"></div>
+            <a href="https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026" target="_blank" rel="noreferrer">
+              FIFA tournament hub
+            </a>
+            <a href="https://vod.fifa.com/organisation/media-releases/updated-world-cup-2026-match-schedule-venues-kick-off-times-104-matches" target="_blank" rel="noreferrer">
+              FIFA updated match schedule release
+            </a>
+            <a href="https://inside.fifa.com/tournament-organisation/commercial/fifa-tv" target="_blank" rel="noreferrer">
+              FIFA media and TV rights
+            </a>
+            <a href="https://docs.firecrawl.dev/api-reference/v2-endpoint/search" target="_blank" rel="noreferrer">
+              Firecrawl v2 search docs
+            </a>
+          </article>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div>
+          <strong>Stay in the game</strong>
+          <p>Unofficial fan utility. Match and broadcast details can change; verify with FIFA and local broadcasters.</p>
+        </div>
+        <form class="subscribe-form">
+          <input type="email" placeholder="Email for reminders" aria-label="Email for reminders" />
+          <button type="submit">Subscribe</button>
+        </form>
+        <p class="credit">
+          Hero image: FIFA World Cup 26 Winner's Trophy tour, Visa newsroom.
+        </p>
+      </footer>
+    </div>
+
+    <div class="search-drawer" id="searchDrawer" aria-hidden="true">
+      <label for="siteSearch">Search matches, cities, broadcasters</label>
+      <input id="siteSearch" type="search" placeholder="Try India, Mexico, Toronto, Brazil..." />
+      <div id="searchResults"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
