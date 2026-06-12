@@ -233,7 +233,7 @@ select {
   position: relative;
   min-height: clamp(550px, 61vh, 720px);
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(420px, 0.58fr);
+  grid-template-columns: 1fr;
   align-items: center;
   gap: 38px;
   padding: 78px 6vw 124px;

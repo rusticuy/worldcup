@@ -375,6 +375,7 @@ function applyExternalLink(anchor, href) {
 }
 
 function updateCountdown() {
+  if (!countdownEl) return;
   const diff = Math.max(0, openingKickoff.getTime() - Date.now());
   const days = Math.floor(diff / 86400000);
   const hours = Math.floor((diff % 86400000) / 3600000);
