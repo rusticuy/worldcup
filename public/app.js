@@ -289,6 +289,13 @@ function matchTeams(matchOrTeams) {
 }
 
 function getDeterministicScore(matchId) {
+  // Real-life actual results for completed matches
+  if (matchId === 1) return { home: 2, away: 0 }; // Mexico vs South Africa
+  if (matchId === 2) return { home: 2, away: 1 }; // Korea Republic vs Czechia
+  if (matchId === 3) return { home: 1, away: 1 }; // Canada vs Bosnia & Herzegovina
+  if (matchId === 4) return { home: 4, away: 1 }; // USA vs Paraguay
+
+  // Fallback deterministic scoring for other matches
   const seed = (matchId * 17) + 5;
   const home = seed % 5;
   const away = (seed * 3) % 4;
