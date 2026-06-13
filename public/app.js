@@ -1535,6 +1535,7 @@ init();
 
 setInterval(updateCountdown, 1000);
 setInterval(updateHostMapTimes, 1000);
+setInterval(loadSchedule, 300000); // Refresh scores dynamically every 5 minutes
 
 matchFilter.addEventListener("change", () => {
   applyScheduleControlState({ type: "select-filter", filter: matchFilter.value });
