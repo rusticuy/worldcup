@@ -317,6 +317,13 @@ function getLiveScore(matchId, kickoffTime) {
 
 function getMatchScoreDisplay(match) {
   if (!match || typeof match !== "object" || !match.id) return null;
+
+  // Use the official live score from the FIFA API if present
+  if (match.score && typeof match.score.home === "number" && typeof match.score.away === "number") {
+    const status = getMatchStatus(match);
+    return { score: match.score, isLive: status.key === "live" };
+  }
+
   const status = getMatchStatus(match);
   if (status.key === "upcoming") return null;
   if (status.key === "live") {
