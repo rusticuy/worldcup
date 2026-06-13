@@ -543,6 +543,12 @@ h1::first-line {
   margin-top: 10px;
 }
 
+.sidebar-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .planner-spotlight {
   padding: 0 6vw;
   margin: 10px 0 0;

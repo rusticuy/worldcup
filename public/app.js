@@ -1162,6 +1162,7 @@ function updateHostMapSelection() {
 }
 
 function updateHostMapTimes() {
+  if (!hostMap && !hostMapDetail) return;
   const citiesById = new Map(hostCityDetails.map((city) => [city.id, city]));
 
   hostMap?.querySelectorAll("[data-city-time]").forEach((node) => {
@@ -1285,6 +1286,7 @@ function renderWatchCard(item) {
 }
 
 function renderCities() {
+  if (!cityStrip) return;
   cityStrip.replaceChildren();
 
   hostCities.forEach(([city, country, stadium, colorA, colorB]) => {

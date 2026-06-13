@@ -24,7 +24,6 @@
           <a href="#planner">Planner</a>
           <a href="#matches">Matches</a>
           <a href="#watch">Watch</a>
-          <a href="#cities">Cities</a>
           <a href="#news">News</a>
         </nav>
         <div class="top-actions">
@@ -126,46 +125,6 @@
           </article>
         </section>
 
-        <section class="wide-grid">
-          <article class="panel host-clock-panel">
-            <div class="panel-heading">
-              <div>
-                <p class="eyebrow">Location time</p>
-                <h2>Host map</h2>
-              </div>
-            </div>
-            <div class="host-map-layout">
-              <div class="host-map" id="hostMap" aria-label="FIFA World Cup 2026 host city stadium map"></div>
-              <aside class="host-map-detail" id="hostMapDetail"></aside>
-            </div>
-          </article>
-
-          <article class="panel watch-panel" id="watch">
-            <div class="panel-heading">
-              <div>
-                <p class="eyebrow">Watch finder</p>
-                <h2>Find legal coverage</h2>
-              </div>
-            </div>
-            <div class="watch-controls">
-              <input id="countrySearch" type="search" placeholder="Search country or broadcaster" />
-              <select id="countrySelect" aria-label="Country"></select>
-            </div>
-            <div class="watch-card" id="watchCard"></div>
-          </article>
-        </section>
-
-        <section class="panel cities-panel" id="cities">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Host cities</p>
-              <h2>Across North America</h2>
-            </div>
-            <span class="muted">Local names shown where available</span>
-          </div>
-          <div class="city-strip" id="cityStrip"></div>
-        </section>
-
         <section class="bottom-grid">
           <article class="panel news-panel" id="news">
             <div class="panel-heading">
@@ -179,28 +138,44 @@
             <div class="news-list" id="newsList"></div>
           </article>
 
-          <article class="panel sources-panel">
-            <div class="panel-heading">
-              <div>
-                <p class="eyebrow">Verified basis</p>
-                <h2>Source links</h2>
+          <div class="sidebar-stack">
+            <article class="panel watch-panel" id="watch">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Watch finder</p>
+                  <h2>Find legal coverage</h2>
+                </div>
               </div>
-            </div>
-            <div class="source-status" id="scheduleStatus">Loading FIFA source status...</div>
-            <div class="source-list" id="scheduleSources"></div>
-            <a href="https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026" target="_blank" rel="noreferrer">
-              FIFA tournament hub
-            </a>
-            <a href="https://vod.fifa.com/organisation/media-releases/updated-world-cup-2026-match-schedule-venues-kick-off-times-104-matches" target="_blank" rel="noreferrer">
-              FIFA updated match schedule release
-            </a>
-            <a href="https://inside.fifa.com/tournament-organisation/commercial/fifa-tv" target="_blank" rel="noreferrer">
-              FIFA media and TV rights
-            </a>
-            <a href="https://docs.firecrawl.dev/api-reference/v2-endpoint/search" target="_blank" rel="noreferrer">
-              Firecrawl v2 search docs
-            </a>
-          </article>
+              <div class="watch-controls">
+                <input id="countrySearch" type="search" placeholder="Search country or broadcaster" />
+                <select id="countrySelect" aria-label="Country"></select>
+              </div>
+              <div class="watch-card" id="watchCard"></div>
+            </article>
+
+            <article class="panel sources-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Verified basis</p>
+                  <h2>Source links</h2>
+                </div>
+              </div>
+              <div class="source-status" id="scheduleStatus">Loading FIFA source status...</div>
+              <div class="source-list" id="scheduleSources"></div>
+              <a href="https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026" target="_blank" rel="noreferrer">
+                FIFA tournament hub
+              </a>
+              <a href="https://vod.fifa.com/organisation/media-releases/updated-world-cup-2026-match-schedule-venues-kick-off-times-104-matches" target="_blank" rel="noreferrer">
+                FIFA updated match schedule release
+              </a>
+              <a href="https://inside.fifa.com/tournament-organisation/commercial/fifa-tv" target="_blank" rel="noreferrer">
+                FIFA media and TV rights
+              </a>
+              <a href="https://docs.firecrawl.dev/api-reference/v2-endpoint/search" target="_blank" rel="noreferrer">
+                Firecrawl v2 search docs
+              </a>
+            </article>
+          </div>
         </section>
       </main>
 
@@ -225,8 +200,6 @@
       <div id="searchResults"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
     <script src="/app.js" type="module"></script>
   </body>
 </html>
