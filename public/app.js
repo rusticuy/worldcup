@@ -395,6 +395,7 @@ function updateCountdown() {
 }
 
 function renderTicker() {
+  if (!tickerTrack) return;
   tickerTrack.replaceChildren();
 
   matches.slice(0, 5).forEach((match) => {
@@ -707,6 +708,7 @@ function renderTimezoneControls() {
 }
 
 function renderTimeStack() {
+  if (!timeStack) return;
   const selectedZone = timezoneSelect.value;
   const upcoming = matches.filter((match) => new Date(match.kickoff).getTime() >= Date.now());
   const plannerMatches = (upcoming.length ? upcoming : matches).slice(0, 4);
