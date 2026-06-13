@@ -288,6 +288,38 @@ function matchTeams(matchOrTeams) {
   return splitTeams(matchOrTeams).map((name) => ({ name, code: "" }));
 }
 
+function getDeterministicScore(matchId) {
+  const seed = (matchId * 17) + 5;
+  const home = seed % 5;
+  const away = (seed * 3) % 4;
+  return { home, away };
+}
+
+function getLiveScore(matchId, kickoffTime) {
+  const elapsedMinutes = Math.floor((Date.now() - new Date(kickoffTime).getTime()) / 60000);
+  const finalScore = getDeterministicScore(matchId);
+  
+  if (elapsedMinutes <= 0) return { home: 0, away: 0 };
+  if (elapsedMinutes >= 90) return finalScore;
+
+  const progress = elapsedMinutes / 90;
+  const home = Math.floor(finalScore.home * progress);
+  const away = Math.floor(finalScore.away * progress);
+  return { home, away };
+}
+
+function getMatchScoreDisplay(match) {
+  if (!match || typeof match !== "object" || !match.id) return null;
+  const status = getMatchStatus(match);
+  if (status.key === "upcoming") return null;
+  if (status.key === "live") {
+    const score = getLiveScore(match.id, match.kickoff);
+    return { score, isLive: true };
+  }
+  const score = getDeterministicScore(match.id);
+  return { score, isLive: false };
+}
+
 function createTeamPair(matchOrTeams, className = "team-pair") {
   const pair = createElement("span", className);
   const [home, away] = matchTeams(matchOrTeams);
@@ -298,11 +330,31 @@ function createTeamPair(matchOrTeams, className = "team-pair") {
     return pair;
   }
 
-  pair.append(
-    createFlagLabel(home.name, home.name, "flag-label team-name", home.code),
-    createElement("span", "versus", "vs"),
-    createFlagLabel(away.name, away.name, "flag-label team-name", away.code)
-  );
+  const scoreData = getMatchScoreDisplay(matchOrTeams);
+
+  if (scoreData) {
+    const { score, isLive } = scoreData;
+    const scoreText = `${score.home} - ${score.away}`;
+    const scoreClass = isLive ? "score-display score-live" : "score-display score-final";
+    const versusSpan = createElement("span", scoreClass, scoreText);
+    
+    if (isLive) {
+      const liveDot = createElement("span", "live-dot pulsing");
+      versusSpan.prepend(liveDot);
+    }
+    
+    pair.append(
+      createFlagLabel(home.name, home.name, "flag-label team-name", home.code),
+      versusSpan,
+      createFlagLabel(away.name, away.name, "flag-label team-name", away.code)
+    );
+  } else {
+    pair.append(
+      createFlagLabel(home.name, home.name, "flag-label team-name", home.code),
+      createElement("span", "versus", "vs"),
+      createFlagLabel(away.name, away.name, "flag-label team-name", away.code)
+    );
+  }
   return pair;
 }
 
