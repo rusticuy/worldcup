@@ -69,7 +69,8 @@ const server = http.createServer(async (req, res) => {
         firecrawlKey: getFirecrawlKey(),
         query: requestUrl.searchParams.get("q"),
         country: requestUrl.searchParams.get("country"),
-        cache: newsCache
+        cache: newsCache,
+        bypassCache: requestUrl.searchParams.get("bypassCache") === "true"
       });
       sendJson(res, 200, payload);
       return;

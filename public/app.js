@@ -1451,12 +1451,13 @@ function renderNews(items) {
   });
 }
 
-async function loadNews() {
+async function loadNews(bypassCache = false) {
   newsStatus.textContent = "Loading latest news...";
   refreshNews.disabled = true;
 
   try {
-    const response = await fetch("/api/news?q=latest&country=US");
+    const url = `/api/news?q=latest&country=US${bypassCache ? "&bypassCache=true" : ""}`;
+    const response = await fetch(url);
     const payload = await response.json();
     renderNews(payload.items || []);
     newsStatus.textContent =
@@ -1561,7 +1562,7 @@ countrySearch.addEventListener("input", () => {
   renderWatchOptions(filtered.length ? filtered : [watchOptions.at(-1)]);
 });
 
-refreshNews.addEventListener("click", loadNews);
+refreshNews.addEventListener("click", () => loadNews(true));
 searchToggle.addEventListener("click", () => {
   const isOpen = searchDrawer.classList.toggle("open");
   searchDrawer.setAttribute("aria-hidden", String(!isOpen));
