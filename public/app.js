@@ -168,9 +168,7 @@ const siteSearch = document.querySelector("#siteSearch");
 const searchResults = document.querySelector("#searchResults");
 let countdownValues = [];
 let selectedMatchdayKey = "";
-let spotlightActiveIndex = 0;
-let spotlightTimer = null;
-let spotlightMatches = [];
+let currentSpotlightMatch = null;
 
 function formatDateTime(value, zone, options = {}) {
   return new Intl.DateTimeFormat("en", {
@@ -462,6 +460,10 @@ function updateCountdown() {
     node.textContent = values[index];
   });
   countdownValues = values;
+
+  if (currentSpotlightMatch && new Date(currentSpotlightMatch.kickoff).getTime() < Date.now()) {
+    renderMatches();
+  }
 }
 
 function renderTicker() {
@@ -552,88 +554,20 @@ function renderScheduleSpotlight(visible, selectedZone) {
   scheduleSpotlight.replaceChildren();
 
   if (!visible.length) {
+    currentSpotlightMatch = null;
     scheduleSpotlight.append(createElement("div", "empty-state", "No fixtures match those filters."));
     return;
   }
 
-  // Filter next 5 upcoming matches
-  const now = Date.now();
-  const upcoming = visible.filter((match) => new Date(match.kickoff).getTime() >= now).slice(0, 5);
+  const target =
+    visible.find((match) => new Date(match.kickoff).getTime() >= Date.now()) ||
+    [...visible].sort((a, b) => new Date(b.kickoff) - new Date(a.kickoff))[0];
 
-  if (upcoming.length > 0) {
-    spotlightMatches = upcoming;
-    // Keep active index in bounds
-    if (spotlightActiveIndex >= upcoming.length) {
-      spotlightActiveIndex = 0;
-    }
+  currentSpotlightMatch = target;
 
-    const slidesContainer = createElement("div", "spotlight-slides-container");
-    scheduleSpotlight.append(slidesContainer);
-
-    upcoming.forEach((match, index) => {
-      const isActive = index === spotlightActiveIndex;
-      const card = createSpotlightCard(match, selectedZone, isActive, false);
-      card.dataset.slideIndex = index;
-      slidesContainer.append(card);
-    });
-
-    if (upcoming.length > 1) {
-      const prevBtn = createElement("button", "spotlight-btn btn-prev", "←");
-      prevBtn.type = "button";
-      prevBtn.setAttribute("aria-label", "Previous upcoming match");
-      prevBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        navigateSpotlight(-1);
-      });
-
-      const nextBtn = createElement("button", "spotlight-btn btn-next", "→");
-      nextBtn.type = "button";
-      nextBtn.setAttribute("aria-label", "Next upcoming match");
-      nextBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        navigateSpotlight(1);
-      });
-
-      scheduleSpotlight.append(prevBtn, nextBtn);
-
-      const dotsContainer = createElement("div", "spotlight-dots");
-      upcoming.forEach((_, index) => {
-        const dot = createElement("button", index === spotlightActiveIndex ? "spotlight-dot is-active" : "spotlight-dot");
-        dot.type = "button";
-        dot.setAttribute("aria-label", `Go to match ${index + 1}`);
-        dot.addEventListener("click", (e) => {
-          e.stopPropagation();
-          setSpotlightSlide(index);
-        });
-        dotsContainer.append(dot);
-      });
-      scheduleSpotlight.append(dotsContainer);
-
-      startSpotlightAutoCycle();
-    } else {
-      stopSpotlightAutoCycle();
-    }
-  } else {
-    stopSpotlightAutoCycle();
-    // Fallback: render single static card for the last match
-    const target = [...visible].sort((a, b) => new Date(b.kickoff) - new Date(a.kickoff))[0];
-    const card = createSpotlightCard(target, selectedZone, true, true);
-    scheduleSpotlight.append(card);
-  }
-}
-
-function createSpotlightCard(match, selectedZone, isActive, isStatic) {
-  const status = getMatchStatus(match);
-  const accents = matchAccents(match.teams);
-  
-  let cardClass = `schedule-spotlight-card status-${status.key}`;
-  if (isStatic) {
-    cardClass += " static-card";
-  } else if (isActive) {
-    cardClass += " is-active";
-  }
-
-  const card = createElement("article", cardClass);
+  const status = getMatchStatus(target);
+  const accents = matchAccents(target.teams);
+  const card = createElement("article", `schedule-spotlight-card status-${status.key}`);
   const copy = createElement("div", "spotlight-copy");
   const heading = createElement("h3", "");
   const source = createElement("a", "source-inline", "FIFA source");
@@ -643,70 +577,26 @@ function createSpotlightCard(match, selectedZone, isActive, isStatic) {
 
   card.style.setProperty("--team-a", accents.home);
   card.style.setProperty("--team-b", accents.away);
-  applyExternalLink(source, match.sourceUrl);
-  heading.append(createTeamPair(match, "team-pair spotlight-teams"));
-  
+  applyExternalLink(source, target.sourceUrl);
+  heading.append(createTeamPair(target, "team-pair spotlight-teams"));
   userTime.append(
     createElement("span", "", "Your time"),
-    createElement("strong", "", formatDateTime(match.kickoff, selectedZone, { weekday: "short", tzName: "short" }))
+    createElement("strong", "", formatDateTime(target.kickoff, selectedZone, { weekday: "short", tzName: "short" }))
   );
   hostTime.append(
-    createElement("span", "", match.city),
-    createElement("strong", "", formatDateTime(match.kickoff, match.zone, { weekday: "short", tzName: "short" }))
+    createElement("span", "", target.city),
+    createElement("strong", "", formatDateTime(target.kickoff, target.zone, { weekday: "short", tzName: "short" }))
   );
   timeGrid.append(userTime, hostTime);
-  
   copy.append(
     createElement("div", "match-status", status.label),
-    createElement("div", "match-meta", `#${match.id} - ${match.stage}`),
+    createElement("div", "match-meta", `#${target.id} - ${target.stage}`),
     heading,
-    createElement("div", "venue-line", `${match.venue}, ${match.city}`),
+    createElement("div", "venue-line", `${target.venue}, ${target.city}`),
     source
   );
   card.append(copy, timeGrid);
-  return card;
-}
-
-function setSpotlightSlide(index) {
-  if (!scheduleSpotlight || !spotlightMatches.length) return;
-  const slides = scheduleSpotlight.querySelectorAll(".schedule-spotlight-card");
-  const dots = scheduleSpotlight.querySelectorAll(".spotlight-dot");
-  if (!slides.length) return;
-
-  const nextIndex = (index + slides.length) % slides.length;
-  const currentIndex = spotlightActiveIndex;
-
-  if (currentIndex === nextIndex) return;
-
-  spotlightActiveIndex = nextIndex;
-
-  slides.forEach((slide, idx) => {
-    slide.classList.toggle("is-active", idx === nextIndex);
-  });
-
-  dots.forEach((dot, idx) => {
-    dot.classList.toggle("is-active", idx === nextIndex);
-  });
-
-  startSpotlightAutoCycle();
-}
-
-function navigateSpotlight(direction) {
-  setSpotlightSlide(spotlightActiveIndex + direction);
-}
-
-function startSpotlightAutoCycle() {
-  stopSpotlightAutoCycle();
-  spotlightTimer = setInterval(() => {
-    navigateSpotlight(1);
-  }, 5000);
-}
-
-function stopSpotlightAutoCycle() {
-  if (spotlightTimer) {
-    clearInterval(spotlightTimer);
-    spotlightTimer = null;
-  }
+  scheduleSpotlight.append(card);
 }
 
 function renderMatchdayRail(groups) {
