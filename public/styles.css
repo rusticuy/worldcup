@@ -556,7 +556,7 @@ h1::first-line {
 
 .planner-spotlight .time-panel {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(280px, 0.8fr) minmax(320px, 1.2fr);
+  grid-template-columns: minmax(280px, 1.35fr) minmax(280px, 0.65fr);
   gap: 18px;
   align-items: stretch;
   border-color: rgba(225, 6, 0, 0.42);
@@ -609,34 +609,21 @@ h1::first-line {
   font-weight: 900;
 }
 
-/* Upcoming Matches Carousel styles */
-.planner-carousel {
+/* Schedule Spotlight Carousel styles */
+.schedule-spotlight {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 240px;
-  padding: 24px 16px;
-  border: 1px solid rgba(247, 248, 250, 0.12);
-  border-radius: 8px;
-  background: rgba(1, 9, 16, 0.42);
-  overflow: hidden;
+  min-height: 168px;
 }
 
-.carousel-slides-container {
+.spotlight-slides-container {
   position: relative;
-  flex: 1;
   width: 100%;
+  height: 168px;
 }
 
-.carousel-slide {
+.schedule-spotlight-card {
   position: absolute;
   inset: 0;
-  padding: 0 36px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 12px;
   opacity: 0;
   transform: translateX(30px);
   transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -644,123 +631,97 @@ h1::first-line {
   z-index: 1;
 }
 
-.carousel-slide.is-active {
+.schedule-spotlight-card.is-active {
   opacity: 1;
   transform: translateX(0);
   pointer-events: auto;
   z-index: 2;
 }
 
-.carousel-slide-prev {
+.schedule-spotlight-card.static-card {
+  position: relative;
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.schedule-spotlight-card-prev {
   opacity: 0;
   transform: translateX(-30px);
 }
 
-.carousel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--muted);
-}
-
-.carousel-badge {
-  background: rgba(225, 6, 0, 0.12);
-  border: 1px solid rgba(225, 6, 0, 0.28);
-  color: #ff3333;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: bold;
-}
-
-.carousel-teams {
-  font-size: 20px;
-  font-weight: bold;
-  line-height: 1.2;
-}
-
-.carousel-kickoff {
-  display: grid;
-  gap: 4px;
-}
-
-.carousel-time-user {
-  font-size: 18px;
-  font-weight: 800;
-  color: #ffffff;
-}
-
-.carousel-time-host {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.carousel-venue {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-/* Carousel controls */
-.carousel-btn {
+/* Spotlight controls */
+.spotlight-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 50%;
   color: #ffffff;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   z-index: 10;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
-.carousel-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.28);
+.spotlight-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.08);
 }
 
-.carousel-btn.btn-prev {
-  left: 6px;
+.spotlight-btn.btn-prev {
+  left: -18px;
 }
 
-.carousel-btn.btn-next {
-  right: 6px;
+.spotlight-btn.btn-next {
+  right: -18px;
 }
 
-.carousel-dots {
+.spotlight-dots {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-top: 14px;
+  margin-top: 10px;
   z-index: 10;
 }
 
-.carousel-dot {
+.spotlight-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.2);
   border: none;
   cursor: pointer;
   padding: 0;
   transition: background 0.3s ease, transform 0.3s ease;
 }
 
-.carousel-dot:hover {
+.spotlight-dot:hover {
   background: rgba(255, 255, 255, 0.45);
 }
 
-.carousel-dot.is-active {
+.spotlight-dot.is-active {
   background: var(--gold, #dfbd60);
   transform: scale(1.2);
+}
+
+@media (max-width: 720px) {
+  .spotlight-btn.btn-prev {
+    left: 4px;
+  }
+  .spotlight-btn.btn-next {
+    right: 4px;
+  }
+  .spotlight-slides-container {
+    height: 230px;
+  }
 }
 
 .planner-spotlight .time-stack {
