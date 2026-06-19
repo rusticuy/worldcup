@@ -150,6 +150,7 @@ const phaseList = document.querySelector("#phaseList");
 const bracketPreview = document.querySelector("#bracketPreview");
 const timezoneSelect = document.querySelector("#timezoneSelect");
 const timeStack = document.querySelector("#timeStack");
+const plannerCarousel = document.querySelector("#plannerCarousel");
 const hostMap = document.querySelector("#hostMap");
 const hostMapDetail = document.querySelector("#hostMapDetail");
 const countrySelect = document.querySelector("#countrySelect");
@@ -167,6 +168,9 @@ const siteSearch = document.querySelector("#siteSearch");
 const searchResults = document.querySelector("#searchResults");
 let countdownValues = [];
 let selectedMatchdayKey = "";
+let carouselActiveIndex = 0;
+let carouselTimer = null;
+let carouselMatches = [];
 
 function formatDateTime(value, zone, options = {}) {
   return new Intl.DateTimeFormat("en", {
@@ -773,23 +777,135 @@ function renderTimezoneControls() {
   });
 }
 
-function renderTimeStack() {
-  if (!timeStack) return;
+function renderPlannerCarousel() {
+  if (!plannerCarousel) return;
   const selectedZone = timezoneSelect.value;
-  const upcoming = matches.filter((match) => new Date(match.kickoff).getTime() >= Date.now());
-  const plannerMatches = (upcoming.length ? upcoming : matches).slice(0, 4);
-  timeStack.replaceChildren();
+  const now = Date.now();
 
-  plannerMatches.forEach((match) => {
-    const row = createElement("div", "time-row");
-    const content = document.createElement("div");
-    content.append(
-      createTeamPair(match, "team-pair time-team"),
-      createElement("span", "match-meta", `${match.city} local: ${formatDateTime(match.kickoff, match.zone)}`)
-    );
-    row.append(content, createElement("em", "", formatDateTime(match.kickoff, selectedZone, { weekday: "short" })));
-    timeStack.append(row);
+  let upcoming = matches.filter((match) => new Date(match.kickoff).getTime() >= now);
+  if (!upcoming.length) {
+    upcoming = matches.slice(-5);
+  } else {
+    upcoming = upcoming.slice(0, 5);
+  }
+  carouselMatches = upcoming;
+
+  plannerCarousel.replaceChildren();
+
+  const slidesContainer = createElement("div", "carousel-slides-container");
+  plannerCarousel.append(slidesContainer);
+
+  upcoming.forEach((match, index) => {
+    const slide = createElement("div", index === carouselActiveIndex ? "carousel-slide is-active" : "carousel-slide");
+    slide.dataset.slideIndex = index;
+
+    const header = createElement("div", "carousel-header");
+    const stageLabel = createElement("span", "", `${match.stage} - Match #${match.id}`);
+    header.append(stageLabel);
+
+    const timeDiff = new Date(match.kickoff).getTime() - now;
+    if (timeDiff > 0 && timeDiff < 24 * 60 * 60 * 1000) {
+      const badge = createElement("span", "carousel-badge", "SOON");
+      header.append(badge);
+    }
+    
+    const teams = createTeamPair(match, "team-pair carousel-teams");
+
+    const kickoffInfo = createElement("div", "carousel-kickoff");
+    const userTimeText = formatDateTime(match.kickoff, selectedZone, { weekday: "short", tzName: "short" });
+    const userTime = createElement("div", "carousel-time-user", userTimeText);
+    
+    const hostTimeText = `${match.city} local: ${formatDateTime(match.kickoff, match.zone, { weekday: "short", tzName: "short" })}`;
+    const hostTime = createElement("div", "carousel-time-host", hostTimeText);
+    
+    kickoffInfo.append(userTime, hostTime);
+    const venue = createElement("div", "carousel-venue", `${match.venue}, ${match.city}`);
+
+    slide.append(header, teams, kickoffInfo, venue);
+    slidesContainer.append(slide);
   });
+
+  if (upcoming.length > 1) {
+    const prevBtn = createElement("button", "carousel-btn btn-prev", "←");
+    prevBtn.type = "button";
+    prevBtn.setAttribute("aria-label", "Previous upcoming match");
+    prevBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      navigateCarousel(-1);
+    });
+
+    const nextBtn = createElement("button", "carousel-btn btn-next", "→");
+    nextBtn.type = "button";
+    nextBtn.setAttribute("aria-label", "Next upcoming match");
+    nextBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      navigateCarousel(1);
+    });
+
+    plannerCarousel.append(prevBtn, nextBtn);
+
+    const dotsContainer = createElement("div", "carousel-dots");
+    upcoming.forEach((_, index) => {
+      const dot = createElement("button", index === carouselActiveIndex ? "carousel-dot is-active" : "carousel-dot");
+      dot.type = "button";
+      dot.setAttribute("aria-label", `Go to match ${index + 1}`);
+      dot.addEventListener("click", (e) => {
+         e.stopPropagation();
+         setCarouselSlide(index);
+      });
+      dotsContainer.append(dot);
+    });
+    plannerCarousel.append(dotsContainer);
+
+    startCarouselAutoCycle();
+  }
+}
+
+function setCarouselSlide(index) {
+  if (!plannerCarousel || !carouselMatches.length) return;
+  const slides = plannerCarousel.querySelectorAll(".carousel-slide");
+  const dots = plannerCarousel.querySelectorAll(".carousel-dot");
+  if (!slides.length) return;
+
+  const nextIndex = (index + slides.length) % slides.length;
+  const currentIndex = carouselActiveIndex;
+
+  if (currentIndex === nextIndex) return;
+
+  carouselActiveIndex = nextIndex;
+
+  slides.forEach((slide, idx) => {
+    slide.classList.remove("is-active", "carousel-slide-prev");
+    if (idx === nextIndex) {
+      slide.classList.add("is-active");
+    } else if (idx === currentIndex) {
+      slide.classList.add("carousel-slide-prev");
+    }
+  });
+
+  dots.forEach((dot, idx) => {
+    dot.classList.toggle("is-active", idx === nextIndex);
+  });
+
+  startCarouselAutoCycle();
+}
+
+function navigateCarousel(direction) {
+  setCarouselSlide(carouselActiveIndex + direction);
+}
+
+function startCarouselAutoCycle() {
+  stopCarouselAutoCycle();
+  carouselTimer = setInterval(() => {
+    navigateCarousel(1);
+  }, 5000);
+}
+
+function stopCarouselAutoCycle() {
+  if (carouselTimer) {
+    clearInterval(carouselTimer);
+    carouselTimer = null;
+  }
 }
 
 function fallbackProjectHostCity({ lat, lon }) {
@@ -1410,7 +1526,7 @@ async function loadSchedule() {
 
   renderTicker();
   renderMatches();
-  renderTimeStack();
+  renderPlannerCarousel();
   renderHostMap();
   renderWatchOptions();
   renderCities();
@@ -1548,7 +1664,7 @@ matchSearch.addEventListener("input", () => {
 timezoneSelect.addEventListener("change", () => {
   applyScheduleControlState({ type: "reset-matchday" });
   renderMatches();
-  renderTimeStack();
+  renderPlannerCarousel();
   renderTicker();
   runGlobalSearch(siteSearch.value);
 });
