@@ -681,12 +681,7 @@ function setSpotlightSlide(index) {
   spotlightActiveIndex = nextIndex;
 
   slides.forEach((slide, idx) => {
-    slide.classList.remove("is-active", "schedule-spotlight-card-prev");
-    if (idx === nextIndex) {
-      slide.classList.add("is-active");
-    } else if (idx === currentIndex) {
-      slide.classList.add("schedule-spotlight-card-prev");
-    }
+    slide.classList.toggle("is-active", idx === nextIndex);
   });
 
   dots.forEach((dot, idx) => {

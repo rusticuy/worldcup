@@ -625,15 +625,13 @@ h1::first-line {
   position: absolute;
   inset: 0;
   opacity: 0;
-  transform: translateX(30px);
-  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.4s ease-in-out;
   pointer-events: none;
   z-index: 1;
 }
 
 .schedule-spotlight-card.is-active {
   opacity: 1;
-  transform: translateX(0);
   pointer-events: auto;
   z-index: 2;
 }
@@ -641,13 +639,7 @@ h1::first-line {
 .schedule-spotlight-card.static-card {
   position: relative;
   opacity: 1;
-  transform: translateX(0);
   pointer-events: auto;
-}
-
-.schedule-spotlight-card-prev {
-  opacity: 0;
-  transform: translateX(-30px);
 }
 
 /* Spotlight controls */
