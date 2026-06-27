@@ -106,6 +106,7 @@
                 <p class="eyebrow">Road to glory</p>
                 <h2>Tournament route</h2>
               </div>
+              <button class="small-button" id="openBracketBtn" type="button">View Tree</button>
             </div>
             <div class="phase-list" id="phaseList"></div>
             <div class="format-grid">
@@ -185,6 +186,16 @@
           Hero image: FIFA World Cup 26 Winner's Trophy tour, Visa newsroom.
         </p>
       </footer>
+    </div>
+
+    <div class="bracket-modal" id="bracketModal" aria-hidden="true" role="dialog" aria-labelledby="bracketModalTitle">
+      <div class="bracket-modal-content">
+        <header class="bracket-modal-header">
+          <h2 id="bracketModalTitle">Tournament Route Map</h2>
+          <button class="bracket-modal-close" id="closeBracketBtn" aria-label="Close modal">&times;</button>
+        </header>
+        <div class="bracket-tree-container" id="bracketTreeContainer"></div>
+      </div>
     </div>
 
     <div class="search-drawer" id="searchDrawer" aria-hidden="true">

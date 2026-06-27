@@ -2487,3 +2487,256 @@ input:focus {
     border-radius: 6px;
   }
 }
+
+/* Bracket Modal styles */
+.bracket-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(1, 9, 16, 0.95);
+  backdrop-filter: blur(12px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bracket-modal.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.bracket-modal-content {
+  width: 96vw;
+  height: 92vh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(18, 20, 28, 0.9);
+  border: 1px solid rgba(242, 199, 92, 0.22);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+.bracket-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 12px;
+}
+
+.bracket-modal-header h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+
+.bracket-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 32px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 12px;
+  border-radius: 4px;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.bracket-modal-close:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.bracket-tree-container {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  gap: 48px;
+  padding: 20px;
+  align-items: stretch;
+  background: rgba(1, 9, 16, 0.4);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* Scrollbar styles for tree container */
+.bracket-tree-container::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.bracket-tree-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 5px;
+}
+.bracket-tree-container::-webkit-scrollbar-thumb {
+  background: rgba(242, 199, 92, 0.15);
+  border-radius: 5px;
+}
+.bracket-tree-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(242, 199, 92, 0.3);
+}
+
+.bracket-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 260px;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.bracket-column-title {
+  text-align: center;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--gold, #dfbd60);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed rgba(242, 199, 92, 0.15);
+  position: sticky;
+  top: 0;
+  background: rgba(18, 20, 28, 0.95);
+  z-index: 10;
+}
+
+.bracket-column-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  flex: 1;
+  min-height: 800px;
+}
+
+/* Bracket Match Card */
+.bracket-match-card {
+  background: rgba(1, 9, 16, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+.bracket-match-card:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: rgba(242, 199, 92, 0.4);
+  box-shadow: 0 6px 16px rgba(242, 199, 92, 0.12);
+}
+
+.bracket-match-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.bracket-match-teams {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bracket-match-team {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #e0e0e0;
+}
+
+.bracket-match-team-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bracket-match-team-name .flag-icon {
+  width: 20px;
+  height: 14px;
+  border-radius: 2px;
+  object-fit: cover;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.bracket-match-score {
+  font-weight: bold;
+  font-size: 14px;
+  color: #ffffff;
+  padding-left: 10px;
+}
+
+/* Winner / Loser Styling */
+.bracket-match-card.has-result .bracket-match-team.is-winner {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.bracket-match-card.has-result .bracket-match-team.is-loser {
+  color: var(--muted);
+  opacity: 0.65;
+}
+
+.bracket-match-card.has-result .bracket-match-team.is-loser .flag-icon {
+  filter: grayscale(40%);
+}
+
+.bracket-match-card.is-live {
+  border-color: var(--brand-red, #e10600);
+  box-shadow: 0 0 12px rgba(225, 6, 0, 0.15);
+}
+
+.bracket-match-card.is-live .bracket-match-info {
+  color: #ff3333;
+}
+
+.bracket-match-card.is-live::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  background-color: #ff3333;
+  border-radius: 50%;
+  animation: pulsing 1.5s infinite;
+}
+
+/* 3rd place match styles */
+.bracket-match-card.third-place-card {
+  margin-top: 24px;
+  border-style: dashed;
+}
+
+/* Highlight Flash Animation for navigated rows */
+.highlight-flash {
+  animation: highlight-pulse 2s ease-out;
+}
+
+@keyframes highlight-pulse {
+  0% {
+    background-color: rgba(242, 199, 92, 0.35);
+    border-color: rgba(242, 199, 92, 0.8);
+  }
+  100% {
+    background-color: transparent;
+    border-color: transparent;
+  }
+}
+

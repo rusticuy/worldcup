@@ -170,6 +170,11 @@ let countdownValues = [];
 let selectedMatchdayKey = "";
 let currentSpotlightMatch = null;
 
+const bracketModal = document.querySelector("#bracketModal");
+const openBracketBtn = document.querySelector("#openBracketBtn");
+const closeBracketBtn = document.querySelector("#closeBracketBtn");
+const bracketTreeContainer = document.querySelector("#bracketTreeContainer");
+
 function formatDateTime(value, zone, options = {}) {
   return new Intl.DateTimeFormat("en", {
     timeZone: zone,
@@ -643,6 +648,7 @@ function renderMatchdayRail(groups) {
 function createFixtureRow(match, selectedZone) {
   const status = getMatchStatus(match);
   const row = createElement("article", `fixture-row status-${status.key}`);
+  row.dataset.matchId = match.id;
   const identity = createElement("div", "fixture-identity");
   const time = createElement("div", "fixture-time");
   const venue = createElement("div", "fixture-venue");
@@ -1576,4 +1582,254 @@ document.querySelector(".subscribe-form").addEventListener("submit", (event) => 
   const input = event.currentTarget.querySelector("input");
   input.value = "";
   input.placeholder = "Reminder saved locally";
+});
+
+// --- Tournament Bracket Tree Modal ---
+
+const bracketStructure = {
+  104: { homeParent: 101, awayParent: 102 }, // Final
+  103: { homeParent: 101, awayParent: 102 }, // 3rd Place
+  101: { homeParent: 97, awayParent: 98 },  // Semi 1
+  102: { homeParent: 99, awayParent: 100 }, // Semi 2
+  97: { homeParent: 89, awayParent: 90 },   // Quarter 1
+  98: { homeParent: 93, awayParent: 94 },   // Quarter 2
+  99: { homeParent: 91, awayParent: 92 },   // Quarter 3
+  100: { homeParent: 95, awayParent: 96 },  // Quarter 4
+  89: { homeParent: 74, awayParent: 77 },   // R16-1
+  90: { homeParent: 73, awayParent: 75 },   // R16-2
+  91: { homeParent: 76, awayParent: 78 },   // R16-3
+  92: { homeParent: 79, awayParent: 80 },   // R16-4
+  93: { homeParent: 83, awayParent: 84 },   // R16-5
+  94: { homeParent: 81, awayParent: 82 },   // R16-6
+  95: { homeParent: 86, awayParent: 88 },   // R16-7
+  96: { homeParent: 85, awayParent: 87 }    // R16-8
+};
+
+function createBracketMatchCard(match, matchesMap) {
+  const status = getMatchStatus(match);
+  const isThirdPlace = match.id === 103;
+  let cardClass = "bracket-match-card";
+  if (isThirdPlace) cardClass += " third-place-card";
+  if (status.key === "live") cardClass += " is-live";
+
+  const scoreData = getMatchScoreDisplay(match);
+  if (scoreData) {
+    cardClass += " has-result";
+  }
+
+  const card = createElement("div", cardClass);
+  card.addEventListener("click", () => {
+    // Determine timezone key and filter to it
+    const zone = timezoneSelect.value;
+    selectedMatchdayKey = formatDateKey(match.kickoff, zone);
+    renderMatches();
+
+    // Close modal
+    bracketModal.classList.remove("is-open");
+    bracketModal.setAttribute("aria-hidden", "true");
+
+    // Smooth scroll and flash highlight
+    setTimeout(() => {
+      const matchRow = document.querySelector(`[data-match-id="${match.id}"]`);
+      if (matchRow) {
+        matchRow.scrollIntoView({ behavior: "smooth", block: "center" });
+        matchRow.classList.add("highlight-flash");
+        setTimeout(() => matchRow.classList.remove("highlight-flash"), 2000);
+      }
+    }, 150);
+  });
+
+  const infoEl = createElement("div", "bracket-match-info");
+  const idLabel = createElement("span", "", `#${match.id}`);
+  const statusLabel = createElement("span", "", status.label);
+  infoEl.append(idLabel, statusLabel);
+
+  const teamsEl = createElement("div", "bracket-match-teams");
+
+  // Helper to resolve a team name (checking preceding match winners if placeholder)
+  const resolveTeam = (rawName, parentId) => {
+    if (!rawName) return { name: "TBD", code: "" };
+
+    const isWinnerPlaceholder = rawName.startsWith("Winner Match");
+    const isLoserPlaceholder = rawName.startsWith("Loser Match");
+
+    if ((isWinnerPlaceholder || isLoserPlaceholder) && parentId) {
+      const parentMatch = matchesMap.get(parentId);
+      if (parentMatch) {
+        const parentScore = getMatchScoreDisplay(parentMatch);
+        if (parentScore) {
+          const homeWins = parentScore.score.home > parentScore.score.away;
+          const awayWins = parentScore.score.away > parentScore.score.home;
+
+          if (parentScore.score.home === parentScore.score.away) {
+            const homeWinsTie = parentMatch.id % 2 === 0;
+            if (isWinnerPlaceholder) {
+              return homeWinsTie
+                ? { name: parentMatch.homeTeam, code: parentMatch.homeCode }
+                : { name: parentMatch.awayTeam, code: parentMatch.awayCode };
+            } else {
+              return homeWinsTie
+                ? { name: parentMatch.awayTeam, code: parentMatch.awayCode }
+                : { name: parentMatch.homeTeam, code: parentMatch.homeCode };
+            }
+          }
+
+          if (isWinnerPlaceholder) {
+            return homeWins
+              ? { name: parentMatch.homeTeam, code: parentMatch.homeCode }
+              : { name: parentMatch.awayTeam, code: parentMatch.awayCode };
+          } else {
+            return homeWins
+              ? { name: parentMatch.awayTeam, code: parentMatch.awayCode }
+              : { name: parentMatch.homeTeam, code: parentMatch.homeCode };
+          }
+        }
+      }
+      const prefix = isWinnerPlaceholder ? "W" : "L";
+      return { name: `${prefix}${parentId}`, code: "" };
+    }
+
+    const isHome = rawName === match.homeTeam;
+    const code = isHome ? match.homeCode : match.awayCode;
+    return { name: rawName, code };
+  };
+
+  const parents = bracketStructure[match.id];
+  const homeResolved = resolveTeam(match.homeTeam, parents?.homeParent);
+  const awayResolved = resolveTeam(match.awayTeam, parents?.awayParent);
+
+  // Home Team Row
+  const homeRow = createElement("div", "bracket-match-team");
+  const homeNameWrap = createElement("div", "bracket-match-team-name");
+  if (homeResolved.code) {
+    const flag = createElement("img", "flag-icon");
+    flag.src = `https://api.fifa.com/api/v3/picture/flags-{format}-{size}/${homeResolved.code}`;
+    flag.alt = "";
+    homeNameWrap.append(flag);
+  }
+  homeNameWrap.append(createElement("span", "", homeResolved.name));
+  homeRow.append(homeNameWrap);
+  if (scoreData) {
+    homeRow.append(createElement("span", "bracket-match-score", String(scoreData.score.home)));
+  }
+
+  // Away Team Row
+  const awayRow = createElement("div", "bracket-match-team");
+  const awayNameWrap = createElement("div", "bracket-match-team-name");
+  if (awayResolved.code) {
+    const flag = createElement("img", "flag-icon");
+    flag.src = `https://api.fifa.com/api/v3/picture/flags-{format}-{size}/${awayResolved.code}`;
+    flag.alt = "";
+    awayNameWrap.append(flag);
+  }
+  awayNameWrap.append(createElement("span", "", awayResolved.name));
+  awayRow.append(awayNameWrap);
+  if (scoreData) {
+    awayRow.append(createElement("span", "bracket-match-score", String(scoreData.score.away)));
+  }
+
+  if (scoreData) {
+    const homeWins = scoreData.score.home > scoreData.score.away;
+    const awayWins = scoreData.score.away > scoreData.score.home;
+    if (scoreData.score.home === scoreData.score.away) {
+      const homeWinsTie = match.id % 2 === 0;
+      homeRow.classList.add(homeWinsTie ? "is-winner" : "is-loser");
+      awayRow.classList.add(homeWinsTie ? "is-loser" : "is-winner");
+    } else {
+      homeRow.classList.add(homeWins ? "is-winner" : "is-loser");
+      awayRow.classList.add(awayWins ? "is-winner" : "is-loser");
+    }
+  }
+
+  teamsEl.append(homeRow, awayRow);
+  card.append(infoEl, teamsEl);
+  return card;
+}
+
+function renderBracketTree() {
+  bracketTreeContainer.replaceChildren();
+  const matchesMap = new Map(matches.map((m) => [m.id, m]));
+
+  const columns = [
+    { key: "Round of 32", title: "Round of 32", matches: [] },
+    { key: "Round of 16", title: "Round of 16", matches: [] },
+    { key: "Quarter-final", title: "Quarter-finals", matches: [] },
+    { key: "Semi-final", title: "Semi-finals", matches: [] },
+    { key: "Finals", title: "Finals", matches: [] }
+  ];
+
+  const visited = new Set();
+
+  function traverse(matchId) {
+    if (visited.has(matchId)) return;
+    visited.add(matchId);
+
+    const match = matchesMap.get(matchId);
+    if (!match) return;
+
+    const stage = match.stage || "";
+    let colIndex = -1;
+    if (stage === "Round of 32") colIndex = 0;
+    else if (stage === "Round of 16") colIndex = 1;
+    else if (stage === "Quarter-final") colIndex = 2;
+    else if (stage === "Semi-final") colIndex = 3;
+    else if (stage === "Final" || stage === "Play-off for third place") colIndex = 4;
+
+    if (colIndex !== -1) {
+      columns[colIndex].matches.unshift(match);
+    }
+
+    const parents = bracketStructure[matchId];
+    if (parents) {
+      traverse(parents.awayParent);
+      traverse(parents.homeParent);
+    }
+  }
+
+  traverse(104);
+
+  const match103 = matchesMap.get(103);
+  if (match103) {
+    columns[4].matches.push(match103);
+  }
+
+  columns.forEach((col) => {
+    const columnEl = createElement("div", "bracket-column");
+    const titleEl = createElement("div", "bracket-column-title", col.title);
+    const contentEl = createElement("div", "bracket-column-content");
+
+    columnEl.append(titleEl, contentEl);
+
+    col.matches.forEach((match) => {
+      const card = createBracketMatchCard(match, matchesMap);
+      contentEl.append(card);
+    });
+
+    bracketTreeContainer.append(columnEl);
+  });
+}
+
+openBracketBtn.addEventListener("click", () => {
+  bracketModal.classList.add("is-open");
+  bracketModal.setAttribute("aria-hidden", "false");
+  renderBracketTree();
+});
+
+closeBracketBtn.addEventListener("click", () => {
+  bracketModal.classList.remove("is-open");
+  bracketModal.setAttribute("aria-hidden", "true");
+});
+
+bracketModal.addEventListener("click", (e) => {
+  if (e.target === bracketModal) {
+    bracketModal.classList.remove("is-open");
+    bracketModal.setAttribute("aria-hidden", "true");
+  }
+});
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && bracketModal.classList.contains("is-open")) {
+    bracketModal.classList.remove("is-open");
+    bracketModal.setAttribute("aria-hidden", "true");
+  }
 });
