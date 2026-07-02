@@ -1419,7 +1419,7 @@ async function loadSchedule() {
     throw new Error(payload.message || `Schedule request failed with ${response.status}`);
   }
 
-  matches = payload.matches || [];
+  matches = (payload.matches || []).sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime());
   hostCities = payload.hostCities || [];
   hostCityDetails = payload.hostCityDetails || [];
   watchOptions = payload.watchOptions || [];
