@@ -169,6 +169,7 @@ const searchResults = document.querySelector("#searchResults");
 let countdownValues = [];
 let selectedMatchdayKey = "";
 let currentSpotlightMatch = null;
+let currentSpotlightMatchStatusKey = "";
 
 const bracketModal = document.querySelector("#bracketModal");
 const openBracketBtn = document.querySelector("#openBracketBtn");
@@ -466,8 +467,12 @@ function updateCountdown() {
   });
   countdownValues = values;
 
-  if (currentSpotlightMatch && new Date(currentSpotlightMatch.kickoff).getTime() < Date.now()) {
-    renderMatches();
+  if (currentSpotlightMatch) {
+    const newStatus = getMatchStatus(currentSpotlightMatch);
+    if (newStatus.key !== currentSpotlightMatchStatusKey) {
+      currentSpotlightMatchStatusKey = newStatus.key;
+      renderMatches();
+    }
   }
 }
 
@@ -564,13 +569,27 @@ function renderScheduleSpotlight(visible, selectedZone) {
     return;
   }
 
-  const target =
-    visible.find((match) => new Date(match.kickoff).getTime() >= Date.now()) ||
-    [...visible].sort((a, b) => new Date(b.kickoff) - new Date(a.kickoff))[0];
+  let target = null;
+  if (selectedMatchdayKey && selectedMatchdayKey !== "all") {
+    const dayMatches = visible.filter((match) => formatDateKey(match.kickoff, selectedZone) === selectedMatchdayKey);
+    target = dayMatches.find((match) => getMatchStatus(match).key !== "final");
+    if (!target && dayMatches.length) {
+      target = [...dayMatches].sort((a, b) => new Date(b.kickoff) - new Date(a.kickoff))[0];
+    }
+  }
+
+  if (!target) {
+    target = visible.find((match) => getMatchStatus(match).key !== "final");
+  }
+
+  if (!target) {
+    target = [...visible].sort((a, b) => new Date(b.kickoff) - new Date(a.kickoff))[0];
+  }
 
   currentSpotlightMatch = target;
 
   const status = getMatchStatus(target);
+  currentSpotlightMatchStatusKey = status.key;
   const accents = matchAccents(target.teams);
   const card = createElement("article", `schedule-spotlight-card status-${status.key}`);
   const copy = createElement("div", "spotlight-copy");
