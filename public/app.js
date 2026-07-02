@@ -176,16 +176,44 @@ const openBracketBtn = document.querySelector("#openBracketBtn");
 const closeBracketBtn = document.querySelector("#closeBracketBtn");
 const bracketTreeContainer = document.querySelector("#bracketTreeContainer");
 
+function relativeDayPrefix(value, zone) {
+  const dateKey = (d) => {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: zone, year: "numeric", month: "2-digit", day: "2-digit"
+    }).formatToParts(d);
+    const get = (type) => parts.find((p) => p.type === type)?.value || "";
+    return `${get("year")}-${get("month")}-${get("day")}`;
+  };
+  const matchKey = dateKey(new Date(value));
+  const now = new Date();
+  if (matchKey === dateKey(now)) return "Today";
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  if (matchKey === dateKey(tomorrow)) return "Tomorrow";
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (matchKey === dateKey(yesterday)) return "Yesterday";
+  return null;
+}
+
 function formatDateTime(value, zone, options = {}) {
-  return new Intl.DateTimeFormat("en", {
+  const relative = relativeDayPrefix(value, zone);
+  const timePart = new Intl.DateTimeFormat("en", {
     timeZone: zone,
-    weekday: options.weekday || "short",
-    month: "short",
-    day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
     timeZoneName: options.tzName || "short"
   }).format(new Date(value));
+  if (relative) {
+    return `${relative}, ${timePart}`;
+  }
+  const datePart = new Intl.DateTimeFormat("en", {
+    timeZone: zone,
+    weekday: options.weekday || "short",
+    month: "short",
+    day: "numeric"
+  }).format(new Date(value));
+  return `${datePart}, ${timePart}`;
 }
 
 function formatTime(zone) {
@@ -217,12 +245,18 @@ function formatKickoffTime(value, zone) {
 }
 
 function formatDateLabel(value, zone, weekday = "long") {
-  return new Intl.DateTimeFormat("en", {
+  const relative = relativeDayPrefix(value, zone);
+  const datePart = new Intl.DateTimeFormat("en", {
     timeZone: zone,
-    weekday,
     month: "short",
     day: "numeric"
   }).format(new Date(value));
+  if (relative) return `${relative}, ${datePart}`;
+  const weekdayPart = new Intl.DateTimeFormat("en", {
+    timeZone: zone,
+    weekday
+  }).format(new Date(value));
+  return `${weekdayPart}, ${datePart}`;
 }
 
 function formatDateKey(value, zone) {
